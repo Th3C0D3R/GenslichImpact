@@ -63,17 +63,47 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	return oPresent(pSwapChain, SyncInterval, Flags);
 }
 
+UINT_PTR unityPlayerBaseAddress = 0;
+UINT_PTR unityPlayerOffsetAddress = 0;
+UINT_PTR userAssemblyBaseAddress = 0;
+
 DWORD WINAPI MainThread(LPVOID lpReserved)
 {
-	bool init_hook = false;
-	do
+	if (!AllocConsole())
 	{
-		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
+		return 1;
+	}
+	freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r", stdin);
+	freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+	SetConsoleTitle("TH3C0D3R(SiedlerLP) | Genslich");
+	RegisterHotKey(NULL, 1, MOD_NOREPEAT, VK_NUMPAD1);
+	MSG msg = { 0 };
+	while (GetMessage(&msg, NULL, 0, 0) != 0)
+	{
+		if (msg.message == WM_HOTKEY)
 		{
-			kiero::bind(8, (void**)& oPresent, hkPresent);
-			init_hook = true;
+			switch (msg.wParam)
+			{
+			case 1: {
+				HMODULE userAssemblyModule = LoadLibrary("UserAssembly.dll");
+				userAssemblyBaseAddress = (UINT_PTR)userAssemblyModule;
+
+				bool init_hook = false;
+				do
+				{
+					if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
+					{
+						kiero::bind(8, (void**)&oPresent, hkPresent);
+						init_hook = true;
+					}
+				} while (!init_hook);
+				break;
+			}
+			}
 		}
-	} while (!init_hook);
+	}
+	FreeConsole();
+
 	return TRUE;
 }
 

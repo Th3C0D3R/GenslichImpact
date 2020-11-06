@@ -1,5 +1,15 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#ifdef __cplusplus__
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+#include "MSCorEE.h"
+#include <iostream>
 #include <Windows.h>
+#include <thread>
+#include <vector>
 #include <d3d11.h>
 #include <dxgi.h>
 #include "kiero/kiero.h"
